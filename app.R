@@ -83,7 +83,6 @@ evdataset$drive <- evdataset$drive |> as.factor()
 
 # (1 Point) Tahapan data pre-processing menggunakan dplyr 1
 # -> filter/arange/mutate/groupby...
-# forward-piping %>% digantikan menggunakan native piping (R 4.1+) |>
 
 # KECEPATAN SETIAP BRAND ####
 
@@ -104,12 +103,8 @@ evspeed <- evdataset |>
     )
   ) |> 
   arrange(desc(mean_top_speed))
-  # filter(total_cars >= 3) |> # <- dijadikan interaktif
 
 # 2 PLOT ----
-
-# (1 Point) Plot yang ditampilkan pada dashboard sudah interaktif 
-# -> cukup pakai plotly atau ggplotly(...)
 
 # PLOT COL/BAR KECEPATAN ====
 
@@ -124,10 +119,6 @@ funcplotevspeed <- function(dataset){
       aes(fill = max_top_speed), show.legend = T
     ) +
     scale_fill_gradient(low = "black", high = "red") +
-    
-    
-    
-    
     coord_flip() +
     labs(
       title = "Kecepatan Terbaik <i>(Top Speed)</i> Mobil Listrik",
@@ -137,7 +128,13 @@ funcplotevspeed <- function(dataset){
     )
 }
 
-# RUBRIK 2: PLOT INTERAKTIF ====
+# RUBRIK 2+3: PLOT INTERAKTIF + PLOT RELEVAN ====
+
+# (1 Point) Plot yang ditampilkan pada dashboard sudah interaktif 
+# -> cukup pakai plotly atau ggplotly(...)
+# (1 Point) Setiap plot yang ditampilkan menampilkan informasi 
+# yang relevan dari dashboard
+# -> menampilkan perbandingan kecepatan rata-rata antar brand 
 
 # ggplotly(funcplotevspeed(evspeed), tooltip = "text")
 
@@ -145,32 +142,33 @@ funcplotevspeed <- function(dataset){
 # SHINY APPS ------------------------------------------------
 
 ui <- dashboardPage(
+  
   dashboardHeader(
     title = "MOBIL ELEKTRIK"
   ),
+  
   dashboardSidebar(
     sidebarMenu(
       menuItem(
         "Kecepatan Terbaik", 
         tabName = "menuTopSpeed",
         icon = icon("car")
+      ),
+      menuItem(
+        text = "Source Code @ Github",
+        href = "https://github.com/taruma/algo-lbb-3"
       )
     )
   ),
+  
   dashboardBody(
     tabItems(
       tabItem(
         "menuTopSpeed",
-        
         fluidPage(
-          
-          # Sidebar Layout
           sidebarLayout(
-            
+
             sidebarPanel(
-              
-              # INPUT
-              
               sliderInput(
                 "sliderTotalCars",
                 label = "Jumlah Mobil Minimum",
@@ -180,18 +178,13 @@ ui <- dashboardPage(
                 step = 1,
                 round = TRUE,
               )
-              
             ),
-            
+
             mainPanel(
-              
-              # OUTPUT
               plotlyOutput(
                 "plotlySpeed", height = "700px"
               )
-              
             ),
-            
           )
         )
       )
@@ -200,7 +193,6 @@ ui <- dashboardPage(
   skin = "red"
 )
 
-# Define server logic required to draw a histogram
 server <- function(input, output) {
   
   evspeedfilter <- reactive(evspeed |>
@@ -217,5 +209,4 @@ server <- function(input, output) {
 
 }
 
-# Run the application 
 shinyApp(ui = ui, server = server)
