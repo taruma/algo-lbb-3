@@ -1,21 +1,21 @@
 # LBB3
+
+# RUBRICS ----
+
 # - (1 Point) Tahapan data pre-processing menggunakan dplyr 1 > filter/arange/mutate/groupby...
 # - (1 Point) Plot yang ditampilkan pada dashboard sudah interaktif > cukup pakai plotly atau ggplotly(...)
 # - (1 Point) Setiap plot yang ditampilkan menampilkan informasi yang relevan dari dashboard > informasinya apa?
 
-# GLOBAL.R SCOPE ----
 
 # LOAD LIBRARY ----
 
-library(shiny)
-library(shinydashboard)
-
 library(plotly)
 library(ggplot2)
-
 library(readr)
 library(dplyr)
 library(glue)
+library(shinydashboard)
+library(shiny)
 
 # LOAD DATASET ----
 
@@ -35,7 +35,7 @@ evdataset <- read_csv('dataset/evdataset.csv')
 # 08 |> Highway - Mild Weather [Km] <- range in Km under mild weather conditions (23 degrees) in cities
 # 09 |> Combined - Mild Weather [Km] <- range in Km under mild weather conditions (23 degrees) in cities
 # 11 |> Acceleration 0 - 100 km/h [seconds] <- acceleration from 0 to 100 Km per hour in seconds
-# 12 |> Top Speed [Km/h] <- Top speed in Km/h
+# 12 |> Top Speed [Km] <- Top speed in Km/h
 # 13 |> Electric Range [Km] <- Advertised electric range in Km
 # 14 |> Total Power [Power]
 # 15 |> Total Torque [Torque]
@@ -85,15 +85,17 @@ evdataset$drive <- evdataset$drive |> as.factor()
 # -> filter/arange/mutate/groupby...
 # forward-piping %>% digantikan menggunakan native piping (R 4.1+) |>
 
-# KECEPATAN SETIAP BRAND ####
+# KECEPATAN SETIAP PABRIK ####
 
 evspeed <- evdataset |> 
   select(make, top_speed, acceleration) |> 
   group_by(make) |> 
   summarise(
     mean_top_speed = mean(top_speed),
+    # mean_acceleration = mean(acceleration),
     max_top_speed = max(top_speed),
-    total_cars = n()
+    # max_acceleration = max(acceleration),
+    total_cars = n(),
   ) |> 
   ungroup() |> 
   mutate(
@@ -103,8 +105,22 @@ evspeed <- evdataset |>
       Maksimum: {format(max_top_speed, digits = 4)} Km/jam"
     )
   ) |> 
+  # filter(total_cars >= 3) |> 
   arrange(desc(mean_top_speed))
-  # filter(total_cars >= 3) |> # <- dijadikan interaktif
+
+# BERAT [UNTUK REACTIVE] #### 
+
+evweight <- evdataset |> 
+  select(
+    make, seats, 
+    length, width, height, 
+    cargo_volume,
+    gross_vehicle_weight, max_payload
+  ) |> 
+  mutate(
+    car_volume = (length*width*height) / 1e6,
+    prop_cargo = cargo_volume / car_volume
+  ) 
 
 # 2 PLOT ----
 
@@ -113,6 +129,21 @@ evspeed <- evdataset |>
 
 # PLOT COL/BAR KECEPATAN ====
 
+# plotevspeed <- evspeed |> 
+#   ggplot(aes(
+#     x = reorder(make, mean_top_speed), y = mean_top_speed,
+#     text = tooltip
+#   )) +
+#   geom_col(aes(fill = max_top_speed), show.legend = T) +
+#   scale_fill_gradient(low = "black", high = "red") +
+#   coord_flip() +
+#   labs(
+#     title = "Kecepatan Terbaik <i>(Top Speed)</i> Mobil Listrik",
+#     x = "Pabrik",
+#     y = "Kecepatan (Km/jam)",
+#     fill = "Kecepatan<br>Maksimum"
+#   )
+
 funcplotevspeed <- function(dataset){
   dataset |>
     ggplot(aes(
@@ -120,14 +151,8 @@ funcplotevspeed <- function(dataset){
       y = mean_top_speed,
       text = tooltip
     )) +
-    geom_col(
-      aes(fill = max_top_speed), show.legend = T
-    ) +
+    geom_col(aes(fill = max_top_speed), show.legend = T) +
     scale_fill_gradient(low = "black", high = "red") +
-    
-    
-    
-    
     coord_flip() +
     labs(
       title = "Kecepatan Terbaik <i>(Top Speed)</i> Mobil Listrik",
@@ -137,84 +162,80 @@ funcplotevspeed <- function(dataset){
     )
 }
 
+# PLOT SCATTER ====
+
+plotevweight <- evweight |> 
+  ggplot(aes(x = car_volume, y = cargo_volume, color = make)) +
+  geom_point(alpha = 0.8)
+
 # RUBRIK 2: PLOT INTERAKTIF ====
 
-# ggplotly(funcplotevspeed(evspeed), tooltip = "text")
+# ggplotly(plotevspeed, tooltip = "text")
+# 
+ggplotly(plotevweight)
 
 
-# SHINY APPS ------------------------------------------------
+# ------------------------------------------------
 
-ui <- dashboardPage(
-  dashboardHeader(
-    title = "MOBIL ELEKTRIK"
-  ),
-  dashboardSidebar(
-    sidebarMenu(
-      menuItem(
-        "Kecepatan Terbaik", 
-        tabName = "menuTopSpeed",
-        icon = icon("car")
+ui <- shiny::fluidPage(
+  
+  # App title
+  titlePanel("MOBIL ELEKTRIK"),
+  
+  # Sidebar Layout
+  sidebarLayout(
+    
+    sidebarPanel(
+      
+      # INPUT
+      
+      # selectInput(
+      #   "selectMake",
+      #   label = "Pilih pabrik",
+      #   choices = levels(evdataset$make) |> c()
+      # ),
+      
+      sliderInput(
+        "sliderTotalCars",
+        label = "Jumlah Mobil Minimum",
+        min = 1,
+        max = max(evspeed$total_cars),
+        value = 1,
+        step = 1,
+        round = TRUE,
+        sep = "."
       )
-    )
-  ),
-  dashboardBody(
-    tabItems(
-      tabItem(
-        "menuTopSpeed",
-        
-        fluidPage(
-          
-          # Sidebar Layout
-          sidebarLayout(
-            
-            sidebarPanel(
-              
-              # INPUT
-              
-              sliderInput(
-                "sliderTotalCars",
-                label = "Jumlah Mobil Minimum",
-                min = 1,
-                max = max(evspeed$total_cars),
-                value = 1,
-                step = 1,
-                round = TRUE,
-              )
-              
-            ),
-            
-            mainPanel(
-              
-              # OUTPUT
-              plotlyOutput(
-                "plotlySpeed", height = "700px"
-              )
-              
-            ),
-            
-          )
-        )
+      
+    ),
+    
+    mainPanel(
+      
+      # OUTPUT
+      
+      plotlyOutput(
+        "plotlySpeed", height = "700px"
       )
+      
     )
-  ),
-  skin = "red"
+    
+  )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-  evspeedfilter <- reactive(evspeed |>
-    filter(total_cars >= input$sliderTotalCars))
+  datasetSpeed <- reactive({
+    evspeed |> filter(total_cars >= input$sliderTotalCars)
+  })
+  
   
   output$plotlySpeed <- renderPlotly(
-    ggplotly(
-      funcplotevspeed(
-        evspeedfilter()
-      ),
-      tooltip = "text"
-    )
-  )
-
+    # ggplotly(plotevspeed, tooltip = "text")
+    ggplotly(funcplotevspeed(datasetSpeed()), tooltip = "text")
+  ) 
+    
+  
+  
 }
 
 # Run the application 
