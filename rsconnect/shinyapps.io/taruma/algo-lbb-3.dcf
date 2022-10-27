@@ -5,10 +5,10 @@ account: taruma
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7426898
-bundleId: 6445209
+bundleId: 6445229
 url: https://taruma.shinyapps.io/algo-lbb-3/
-when: 1666834444.92354
-lastSyncTime: 1666834444.92355
+when: 1666835296.28521
+lastSyncTime: 1666835296.28522
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: _checkpointapp.R|_cobapp.R|dataset/source.txt|README.md
