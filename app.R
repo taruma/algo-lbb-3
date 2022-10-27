@@ -199,7 +199,7 @@ ui <- dashboardPage(
             "# DATASET _ELECTRIC VEHICLE_
 
             Source: <https://www.kaggle.com/datasets/mohamedalishiha/electric-vehicles>
-            
+
             ```
             - 01 |> id <- unique identifier
             - 02 |> Make <- brand of the car
@@ -254,7 +254,9 @@ server <- function(input, output) {
 
   # https://stackoverflow.com/questions/30765338
   output$tableDataset <- renderDataTable(
-    evdataset, options = list(pageLength = 20, scrollX = "400px"), filter = 'top'
+    evdataset,
+    options = list(pageLength = 20, scrollX = "400px"), 
+    filter = "top"
   )
 }
 
