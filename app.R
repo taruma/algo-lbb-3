@@ -255,7 +255,7 @@ server <- function(input, output) {
   # https://stackoverflow.com/questions/30765338
   output$tableDataset <- renderDataTable(
     evdataset,
-    options = list(pageLength = 20, scrollX = "400px"), 
+    options = list(pageLength = 20, scrollX = "400px"),
     filter = "top"
   )
 }
