@@ -1,6 +1,6 @@
 # LBB3
 
-Learn By ~~Building~~ Googling. Produk terwujud karena ~~Algo~~ saya + google + referensi/manual. 
+Learn By ~~Building~~ Googling. Produk terwujud karena ~~Algo~~ saya + google + referensi/manual + ngerumpi sama yang lain. 
 
 apps: [algo-lbb-3](https://taruma.shinyapps.io/algo-lbb-3/)
 
