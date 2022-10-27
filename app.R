@@ -124,7 +124,7 @@ funcplotevspeed <- function(dataset) {
     scale_fill_gradient(low = "black", high = "red") +
     coord_flip() +
     labs(
-      title = "Kecepatan Terbaik <i>(Top Speed)</i> Mobil Listrik",
+      title = "Rata-rata Kecepatan Terbaik <i>(Top Speed)</i>",
       x = "Brand",
       y = "Kecepatan (Km/jam)",
       fill = "Kecepatan<br>Maksimum"
