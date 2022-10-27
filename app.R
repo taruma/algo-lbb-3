@@ -17,11 +17,13 @@ library(readr)
 library(dplyr)
 library(glue)
 
+library(DT)
+
 # LOAD DATASET ----
 
 # https://www.kaggle.com/datasets/mohamedalishiha/electric-vehicles
 
-evdataset <- read_csv('dataset/evdataset.csv')
+evdataset <- read_csv("dataset/evdataset.csv")
 
 # DATASET: ELECTRIC VEHICLES (evdataset) ====
 
@@ -34,24 +36,24 @@ evdataset <- read_csv('dataset/evdataset.csv')
 # 07 |> City - Mild Weather [Km] <- range in Km under mild weather conditions (23 degrees) in cities
 # 08 |> Highway - Mild Weather [Km] <- range in Km under mild weather conditions (23 degrees) in cities
 # 09 |> Combined - Mild Weather [Km] <- range in Km under mild weather conditions (23 degrees) in cities
-# 11 |> Acceleration 0 - 100 km/h [seconds] <- acceleration from 0 to 100 Km per hour in seconds
-# 12 |> Top Speed [Km/h] <- Top speed in Km/h
-# 13 |> Electric Range [Km] <- Advertised electric range in Km
-# 14 |> Total Power [Power]
-# 15 |> Total Torque [Torque]
-# 16 |> Drive <- Rear, Front, AWD (Sumbu roda?)
-# 17 |> Battery Capacity [KW] <- Total capacity of the battery in KW
-# 18 |> Charge Power
-# 19 |> Charge Speed
-# 20 |> Fastcharge Speed
-# 21 |> Length [mm] <- Car lengths in mm
-# 22 |> Width [mm] <- Car width in mm
-# 23 |> Height [mm] <- Car height in mm
-# 24 |> Wheelbase [mm] <- Wheelbase in mm
-# 25 |> Gross Vehicle Weight (GVWR) [Kg] <- Gross weight of the car in Kg
-# 26 |> Max. Payload
-# 27 |> Cargo Volume [liter/dm^3] <- Cargo volume of the car in litters
-# 28 |> Seats <- Number of seats
+# 10 |> Acceleration 0 - 100 km/h [seconds] <- acceleration from 0 to 100 Km per hour in seconds
+# 11 |> Top Speed [Km/h] <- Top speed in Km/h
+# 12 |> Electric Range [Km] <- Advertised electric range in Km
+# 13 |> Total Power [Power]
+# 14 |> Total Torque [Torque]
+# 15 |> Drive <- Rear, Front, AWD (Sumbu roda?)
+# 16 |> Battery Capacity [KW] <- Total capacity of the battery in KW
+# 17 |> Charge Power
+# 18 |> Charge Speed
+# 19 |> Fastcharge Speed
+# 20 |> Length [mm] <- Car lengths in mm
+# 21 |> Width [mm] <- Car width in mm
+# 22 |> Height [mm] <- Car height in mm
+# 23 |> Wheelbase [mm] <- Wheelbase in mm
+# 24 |> Gross Vehicle Weight (GVWR) [Kg] <- Gross weight of the car in Kg
+# 25 |> Max. Payload
+# 26 |> Cargo Volume [liter/dm^3] <- Cargo volume of the car in litters
+# 27 |> Seats <- Number of seats
 
 # CODE ----
 
@@ -60,16 +62,16 @@ evdataset <- read_csv('dataset/evdataset.csv')
 # Menyederhanakan nama kolom
 
 newname_columns <- c(
-  'id', 'make', 'link',
-  'cold_city', 'cold_highway', 'cold_combined',
-  'mild_city', 'mild_highway', 'mild_combined',
-  'acceleration', 'top_speed', 'electric_range',
-  'total_power', 'total_torque',
-  'drive',
-  'battery_capacity', 'charge_power', 'charge_speed', 'fastcharge_speed',
-  'length', 'width', 'height', 'wheelbase',
-  'gross_vehicle_weight', 'max_payload', 
-  'cargo_volume', 'seats'
+  "id", "make", "link",
+  "cold_city", "cold_highway", "cold_combined",
+  "mild_city", "mild_highway", "mild_combined",
+  "acceleration", "top_speed", "electric_range",
+  "total_power", "total_torque",
+  "drive",
+  "battery_capacity", "charge_power", "charge_speed", "fastcharge_speed",
+  "length", "width", "height", "wheelbase",
+  "gross_vehicle_weight", "max_payload",
+  "cargo_volume", "seats"
 )
 
 names(evdataset) <- newname_columns
@@ -86,29 +88,29 @@ evdataset$drive <- evdataset$drive |> as.factor()
 
 # KECEPATAN SETIAP BRAND ####
 
-evspeed <- evdataset |> 
-  select(make, top_speed, acceleration) |> 
-  group_by(make) |> 
+evspeed <- evdataset |>
+  select(make, top_speed, acceleration) |>
+  group_by(make) |>
   summarise(
     mean_top_speed = mean(top_speed),
     max_top_speed = max(top_speed),
     total_cars = n()
-  ) |> 
-  ungroup() |> 
+  ) |>
+  ungroup() |>
   mutate(
     tooltip = glue(
       "<b>{make}</b> [{total_cars} car(s)]
       Rata-rata: {mean_top_speed |> format(digits = 4)} Km/jam
       Maksimum: {format(max_top_speed, digits = 4)} Km/jam"
     )
-  ) |> 
+  ) |>
   arrange(desc(mean_top_speed))
 
 # 2 PLOT ----
 
 # PLOT COL/BAR KECEPATAN ====
 
-funcplotevspeed <- function(dataset){
+funcplotevspeed <- function(dataset) {
   dataset |>
     ggplot(aes(
       x = reorder(make, mean_top_speed),
@@ -116,7 +118,8 @@ funcplotevspeed <- function(dataset){
       text = tooltip
     )) +
     geom_col(
-      aes(fill = max_top_speed), show.legend = T
+      aes(fill = max_top_speed),
+      show.legend = T
     ) +
     scale_fill_gradient(low = "black", high = "red") +
     coord_flip() +
@@ -130,11 +133,11 @@ funcplotevspeed <- function(dataset){
 
 # RUBRIK 2+3: PLOT INTERAKTIF + PLOT RELEVAN ====
 
-# (1 Point) Plot yang ditampilkan pada dashboard sudah interaktif 
+# (1 Point) Plot yang ditampilkan pada dashboard sudah interaktif
 # -> cukup pakai plotly atau ggplotly(...)
-# (1 Point) Setiap plot yang ditampilkan menampilkan informasi 
+# (1 Point) Setiap plot yang ditampilkan menampilkan informasi
 # yang relevan dari dashboard
-# -> menampilkan perbandingan kecepatan rata-rata antar brand 
+# -> menampilkan perbandingan kecepatan rata-rata antar brand
 
 # ggplotly(funcplotevspeed(evspeed), tooltip = "text")
 
@@ -142,32 +145,33 @@ funcplotevspeed <- function(dataset){
 # SHINY APPS ------------------------------------------------
 
 ui <- dashboardPage(
-  
   dashboardHeader(
     title = "MOBIL ELEKTRIK"
   ),
-  
   dashboardSidebar(
     sidebarMenu(
       menuItem(
-        "Kecepatan Terbaik", 
+        "Kecepatan Terbaik",
         tabName = "menuTopSpeed",
         icon = icon("car")
       ),
       menuItem(
-        text = "Source Code @ Github",
+        "Dataset",
+        tabName = "menuDataset",
+        icon = icon("table")
+      ),
+      menuItem(
+        text = "Source code @ Github",
         href = "https://github.com/taruma/algo-lbb-3"
       )
     )
   ),
-  
   dashboardBody(
     tabItems(
       tabItem(
         "menuTopSpeed",
         fluidPage(
           sidebarLayout(
-
             sidebarPanel(
               sliderInput(
                 "sliderTotalCars",
@@ -179,13 +183,55 @@ ui <- dashboardPage(
                 round = TRUE,
               )
             ),
-
             mainPanel(
               plotlyOutput(
-                "plotlySpeed", height = "700px"
+                "plotlySpeed",
+                height = "700px"
               )
             ),
           )
+        )
+      ),
+      tabItem(
+        "menuDataset",
+        fluidPage(
+          markdown(
+            "# DATASET _ELECTRIC VEHICLE_
+
+            Source: <https://www.kaggle.com/datasets/mohamedalishiha/electric-vehicles>
+            
+            ```
+            - 01 |> id <- unique identifier
+            - 02 |> Make <- brand of the car
+            - 03 |> link <- source url
+            - 04 |> City - Cold Weather [Km] <- range in Km under cold weather conditions (-10 degrees) in cities
+            - 05 |> Highway - Cold Weather [Km] <- range in Km under cold weather conditions (-10 degrees) on highways
+            - 06 |> Combined - Cold Weather [Km] <- range in Km under cold weather conditions (-10 degrees) combined
+            - 07 |> City - Mild Weather [Km] <- range in Km under mild weather conditions (23 degrees) in cities
+            - 08 |> Highway - Mild Weather [Km] <- range in Km under mild weather conditions (23 degrees) in cities
+            - 09 |> Combined - Mild Weather [Km] <- range in Km under mild weather conditions (23 degrees) in cities
+            - 10 |> Acceleration 0 - 100 km/h [seconds] <- acceleration from 0 to 100 Km per hour in seconds
+            - 11 |> Top Speed [Km/h] <- Top speed in Km/h
+            - 12 |> Electric Range [Km] <- Advertised electric range in Km
+            - 13 |> Total Power [Power]
+            - 14 |> Total Torque [Torque]
+            - 15 |> Drive <- Rear, Front, AWD (Sumbu roda?)
+            - 16 |> Battery Capacity [KW] <- Total capacity of the battery in KW
+            - 17 |> Charge Power
+            - 18 |> Charge Speed
+            - 19 |> Fastcharge Speed
+            - 20 |> Length [mm] <- Car lengths in mm
+            - 21 |> Width [mm] <- Car width in mm
+            - 22 |> Height [mm] <- Car height in mm
+            - 23 |> Wheelbase [mm] <- Wheelbase in mm
+            - 24 |> Gross Vehicle Weight (GVWR) [Kg] <- Gross weight of the car in Kg
+            - 25 |> Max. Payload
+            - 26 |> Cargo Volume [liter/dm^3] <- Cargo volume of the car in litters
+            - 27 |> Seats <- Number of seats
+            ```
+            "
+          ),
+          DT::dataTableOutput("tableDataset")
         )
       )
     )
@@ -194,10 +240,9 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
-  
   evspeedfilter <- reactive(evspeed |>
     filter(total_cars >= input$sliderTotalCars))
-  
+
   output$plotlySpeed <- renderPlotly(
     ggplotly(
       funcplotevspeed(
@@ -207,6 +252,10 @@ server <- function(input, output) {
     )
   )
 
+  # https://stackoverflow.com/questions/30765338
+  output$tableDataset <- renderDataTable(
+    evdataset, options = list(pageLength = 20, scrollX = "400px"), filter = 'top'
+  )
 }
 
 shinyApp(ui = ui, server = server)
