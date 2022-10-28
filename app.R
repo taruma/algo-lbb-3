@@ -149,6 +149,16 @@ ui <- dashboardPage(
     title = "MOBIL ELEKTRIK"
   ),
   dashboardSidebar(
+    tags$head(
+      # Note the wrapping of the string in HTML()
+      tags$style(HTML("
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code');
+        
+        code {
+          font-family: 'Fira Code';
+        };"
+      ))
+    ),
     sidebarMenu(
       menuItem(
         "Kecepatan Terbaik",
